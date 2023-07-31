@@ -1,3 +1,10 @@
+/*
+ * @Date: 2023-07-23 22:52:30
+ * @LastEditTime: 2023-07-31 17:26:42
+ * @FilePath: /stu/study/WhaleMarket/src/tools/toolfcns.c
+ * @Description: 工具函数
+ * 
+ */
 #include "tools/toolfcns.h"
 
 /*
@@ -36,6 +43,30 @@ void create_dir(void)
     }
     else
     {
-        close(storeDir);
+        closedir(storeDir);
     }
+}
+
+int save_choose(void)
+{
+    int jud = -1;
+    printf("Do you want to save the data? plz input [y/Y] or [n/N]:");
+    char save_jud = 'y';
+    scanf("%c", &save_jud);
+    while(save_jud == 'y' && save_jud == 'Y' && save_jud == 'n' && save_jud == 'N')
+    {
+        if(save_jud == 'y' && save_jud == 'Y')
+        {
+            jud = 0;
+            printf("Save successful\n");
+        }
+        else if(save_jud == 'n' && save_jud == 'N')
+            break;
+        else
+        {
+            printf("Please input  [y/Y] or [n/N]:");
+            continue;
+        }
+    }
+    return jud;
 }
