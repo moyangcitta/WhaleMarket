@@ -1,6 +1,6 @@
 /*
  * @Date: 2023-07-23 22:52:30
- * @LastEditTime: 2023-07-31 17:26:42
+ * @LastEditTime: 2023-08-01 13:41:09
  * @FilePath: /stu/study/WhaleMarket/src/tools/toolfcns.c
  * @Description: 工具函数
  * 
@@ -47,6 +47,10 @@ void create_dir(void)
     }
 }
 
+/**
+ * @description: 判断是否保存，保存成功返回0， 保存失败返回-1
+ * @return {*}
+ */
 int save_choose(void)
 {
     int jud = -1;
@@ -69,4 +73,46 @@ int save_choose(void)
         }
     }
     return jud;
+}
+
+/**
+ * @description: 根据给入的ID给出该ID的下一位ID
+ * @param {char} *temp_ID
+ * @return {*}
+ */
+void edit_ID(char *temp_ID)
+{
+    int len = sizeof(temp_ID)/sizeof(char);
+    for(int i = len - 1; i >= 0; i--)
+    {
+        if(temp_ID[i] >= '0' && temp_ID[i] < '9')
+        {
+            temp_ID[i]++;
+            break;
+        }
+        else if(temp_ID[i] == '9')
+        {
+            temp_ID[i] = '0';
+        }
+    }
+}
+
+/**
+ * @description: 比较word2减去word1的差值大小，并以整数的形式返回
+ * @param {char} *word1
+ * @param {char} *word2
+ * @return {*}
+ */
+int difference_value(char *word1, char *word2)
+{
+    int rcd = 0;
+    for(int i = 0; i < 6; i++)
+    {
+        int difference_value = word2[i] - word1[i];
+        if(difference_value > 0)
+        {
+            rcd = rcd * 10 + difference_value;
+        }
+    }
+    return rcd;
 }

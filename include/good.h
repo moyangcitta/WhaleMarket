@@ -1,6 +1,6 @@
 /*
  * @Date: 2023-07-08 10:35:50
- * @LastEditTime: 2023-07-31 22:05:49
+ * @LastEditTime: 2023-08-01 16:11:30
  * @FilePath: /stu/study/WhaleMarket/include/good.h
  * @Description: 
  * 
@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "tools/toolfcns.h";
+#include "tools/toolfcns.h"
 
 typedef struct{
     char good_ID[6];            //商品ID，开头字符为大写字符M，后5位为数字
@@ -25,19 +25,19 @@ typedef struct{
     int good_status;            //商品状态，包括已售出，已下架，销售中
 } GOODS;
 
-//链表
+//链表，第一个节点为空节点，用于保存链表的头部地址
 typedef struct GOODS_LIST{
     GOODS good_data;
     struct GOODS_LIST *next;
 } GOODS_LIST;
 
-GOODS_LIST* create_goods_array(void);     //创建商品链表
-int array_size(GOODS_ARRAY *array);     //返回数组长度
-void array_add(GOODS_ARRAY *array, GOODS good_data);     //向数组中增加数据
-void good_info(GOODS_ARRAY *array);      //向数组中添加商品信息
-void array_inflate(GOODS_ARRAY *array); //扩充商品信息数组
-int del_good(GOODS_ARRAY *goods_array, char *good_id)           //根据商品ID删除商品
-void save_goods_data(GOODS_ARRAY *goods_array);     //更改商品信息，将商品信息输入到文件中
-GOODS_ARRAY goods_data_init(void);      //判断商品文档是否存在，如果存在读取文件中的商品信息，如果不存在创建商品文档
+GOODS_LIST* create_goods_array(void);                   //创建商品链表
+int goods_size(GOODS_LIST *goods_list);                 //返回链表长度
+int goods_add(GOODS_LIST *goods_list);                  //向商品链表中增加数据
+GOODS goods_info(char *pre_good_id);                    //输入商品信息，返回商品信息结构体
+int goods_del(GOODS_LIST *goods_list, char *good_id);   //删除链表中的商品信息
+int goods_edit(GOODS_LIST *goods_list, char *good_id);  //根据商品id编辑相应的商品信息
+int save_goods_data(GOODS_LIST *goods_array);           //更改商品信息，将商品信息输入到文件中
+GOODS_LIST* goods_data_init(void);                      //判断商品文档是否存在，如果存在读取文件中的商品信息，如果不存在创建商品文档
 
 #endif

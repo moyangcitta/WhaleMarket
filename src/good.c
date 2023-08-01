@@ -1,3 +1,10 @@
+/*
+ * @Date: 2023-07-08 10:35:44
+ * @LastEditTime: 2023-08-01 17:07:09
+ * @FilePath: /stu/study/WhaleMarket/src/good.c
+ * @Description: 
+ * 
+ */
 #include "good.h"
 
 /**
@@ -11,14 +18,22 @@ GOODS_LIST* create_goods_list(void)
     return goods_list;
 }
 
-/*
-输入：动态数组
-功能：返回数组长度
-输出：数组长度
-*/
-int array_size(GOODS_ARRAY *array)
+/**
+ * @description: 返回链表长度
+ * @param {GOODS_LIST} *goods_list
+ * @return {*}
+ */
+int goods_size(GOODS_LIST *goods_list)
 {
-    return array->size;
+    int len = 0;
+    GOODS_LIST *temp_list = goods_list;
+    while(temp_list->next != NULL)
+    {
+        temp_list->next = temp_list->next->next;
+        ++len;
+    }
+    
+    return len;
 }
 
 /*
@@ -26,94 +41,119 @@ int array_size(GOODS_ARRAY *array)
 功能：向数组中增加数据，如果商品信息小于200行且数组有空余，则增加数据，如果商品信息小于200行且数组无空余，则扩充数组，如果商品信息达到200行，则输出报错
 输出：无
 */
-void array_add(GOODS_ARRAY *array, GOODS good_data)
+int goods_add(GOODS_LIST *goods_list)
 {
-    if(array->real_size == 200)
+    int jud = 0;
+    //如果goods_list数量多于200
+    if(200 <= goods_size(goods_list))
     {
-        printf("Goods information greater than 200, can't input Goods information!");
+        jud = -1;
     }
-    else if(array->real_size < array->size)
-    {
-        good_add(array);
-        save_goods_data(array);
+    else{
+        GOODS_LIST *temp_list = goods_list;
+        while(temp_list != NULL)
+        {
+            //如果商品链表末尾为NULL
+            if(temp_list->next == NULL)
+            {
+                GOODS_LIST *temp_node = create_goods_list();
+                temp_node->good_data = goods_info(temp_list->good_data.good_ID);
+                temp_list->next = temp_node;
+                break;
+            }   
+            //如果商品链表中间编号不是连续的，则在断开的编号后增加商品
+            if(1 < difference_value(temp_list->good_data.good_ID, temp_list->next->good_data.good_ID))
+            {
+                GOODS_LIST *temp_node = create_goods_list();
+                temp_node->good_data = goods_info(temp_list->good_data.good_ID);
+                temp_node->next = temp_list->next;
+                temp_list->next = temp_node;
+                break;
+            }
+            temp_list = temp_list->next;
+        }
+        if(!save_choose())
+        {
+            save_goods_data(goods_list);
+        }
     }
-    else if(array->real_size > array->size)
-    {
-        array_inflate(array);
-        good_add(array);
-        save_goods_data(array);
-    }
-}
-
-/*
-输入：array，商品信息数组
-功能：向商品信息数组中存入数据
-输出：无
-*/
-void good_info(GOODS_ARRAY *array)
-{
-    scanf("%s", array->goods_array[array->real_size++].good_ID);
-    scanf("%s", array->goods_array[array->real_size++].good_name);
-    scanf("%lf", &array->goods_array[array->real_size++].good_price);
-    scanf("%s", array->goods_array[array->real_size++].good_desription);
-    scanf("%s", array->goods_array[array->real_size++].seller_ID);
-    scanf("%s", array->goods_array[array->real_size++].listing_time);
-    scanf("%d", &array->goods_array[array->real_size++].good_status);
-}
-
-/*
-输入：array，商品信息数组
-功能：扩充商品信息数组
-输出：无
-*/
-void array_inflate(GOODS_ARRAY *array)
-{
-    GOODS *temp = (GOODS*)malloc(sizeof(GOODS)*(array->size + 5));
-    for(int i = 0; i < array->real_size; i++)
-    {
-        temp[i] = array->goods_array[i];
-    }
-    free(array->goods_array);
-    array->goods_array = temp;
-    array->size += 5;
+    return jud;
 }
 
 /**
- * @description: 根据商品ID删除商品，成功返回0，失败返回-1
- * @param {GOODS_ARRAY} *goods_array
+ * @description: 输入商品信息，返回商品信息结构体
+ * @return {*}
+ */
+GOODS goods_info(char *pre_good_id)
+{
+    GOODS good_data;
+    strcpy(good_data.good_ID, pre_good_id);
+    edit_ID(good_data.good_ID);
+    scanf("%s", good_data.good_name);
+    scanf("%lf", &good_data.good_price);
+    scanf("%s", good_data.good_desription);
+    scanf("%s", good_data.seller_ID);
+    scanf("%s", good_data.listing_time);
+    scanf("%d", &good_data.good_status);
+    return good_data;
+}
+
+/**
+ * @description: 删除链表中的商品信息，如果成功删除，返回0，删除失败，返回-1，表示该商品不存在
+ * @param {GOODS_LIST} *goods_list
  * @param {char} *good_id
  * @return {*}
  */
-int del_good(GOODS_ARRAY *goods_array, char *good_id)
+int goods_del(GOODS_LIST *goods_list, char *good_id)
 {
     int jud = -1;
-    if(goods_array->real_size != 0)
+    if(goods_list->next != NULL)
     {
-        for(int i = 0; i < goods_array->real_size; i++)
+        GOODS_LIST *temp_list = goods_list;
+        while(temp_list->next != NULL)
         {
-            if((!strcmp(goods_array->goods_array[i].good_ID, good_id)) && (!save_choose()))
+            if(!strcmp(temp_list->next->good_data.good_ID, good_id))
             {
+                GOODS_LIST *temp_node = temp_list;
+                temp_list->next = temp_node->next;
+                free(temp_node);
                 jud = 0;
-                GOODS *temp = (GOODS*)malloc(sizeof(GOODS)*goods_array->size);
-                for(int j = 0; j < goods_array->real_size; j++)
-                {
-                    if(j >= i)
-                    {   
-                        temp[j] = goods_array->goods_array[j + 1];
-                        continue;
-                    }
-                    temp[j] = goods_array->goods_array[j];
-                }
-                free(goods_array->goods_array);
-                goods_array->goods_array = temp;
-                save_goods_data(goods_array);
                 break;
             }
         }
+        if(!save_choose())
+        {
+            save_goods_data(goods_list);
+        }
     }
-    if(jud == -1)
+    return jud;
+}
+
+/**
+ * @description: 商品信息编辑，根据商品id决定需要修改的商品信息，成功编辑返回0，编辑失败返回-1
+ * @param {GOODS_LIST} *goods_list
+ * @param {char} *good_id
+ * @return {*}
+ */
+int goods_edit(GOODS_LIST *goods_list, char *good_id)
+{
+    int jud = -1;
+    if(goods_list->next != NULL)
     {
-        printf("删除失败，没有该商品\n");
+        GOODS_LIST *temp_list = goods_list;
+        while(temp_list->next != NULL)
+        {
+            if(strcmp(temp_list->next->good_data.good_ID, good_id))
+            {
+                temp_list->next->good_data = goods_info(temp_list->good_data.good_ID);
+                jud = 0;
+                break;
+            }
+        }
+        if(!save_choose())
+        {
+            save_goods_data(goods_list);
+        }
     }
     return jud;
 }
@@ -123,24 +163,29 @@ int del_good(GOODS_ARRAY *goods_array, char *good_id)
 功能：更改商品信息，将商品信息保存到GOODS文档中
 输出：无
 */
-void save_goods_data(GOODS_ARRAY *goods_array)
+int save_goods_data(GOODS_LIST *goods_list)
 {
+    int jud = -1;
     FILE *goodFp = fopen("./store/GOODS.txt", "w+");
     if(goodFp)
     {   
-        for(int i = 0; i < goods_array->real_size; i++)
+        GOODS_LIST *temp_list = goods_list;
+        while(temp_list->next != NULL)
         {
             fprintf(goodFp, "%s %s %.1lf %s %s %s %d\n", \
-            goods_array->goods_array[i].good_ID, \
-            goods_array->goods_array[i].good_name, \
-            goods_array->goods_array[i].good_price, \
-            goods_array->goods_array[i].good_desription, \
-            goods_array->goods_array[i].seller_ID, \
-            goods_array->goods_array[i].listing_time, \
-            goods_array->goods_array[i].good_status);
+            temp_list->next->good_data.good_ID, \
+            temp_list->next->good_data.good_name, \
+            temp_list->next->good_data.good_price, \
+            temp_list->next->good_data.good_desription, \
+            temp_list->next->good_data.seller_ID, \
+            temp_list->next->good_data.listing_time, \
+            temp_list->next->good_data.good_status);
+            temp_list = temp_list->next;
         }
         fclose(goodFp);
+        jud = 0;
     }
+    return jud;
 }
 
 /*
@@ -148,26 +193,31 @@ void save_goods_data(GOODS_ARRAY *goods_array)
 功能：读取GOODS文档中的商品信息
 输出：存放商品信息的数组
 */
-GOODS_ARRAY goods_data_init(void)
+GOODS_LIST* goods_data_init(void)
 {
     FILE *goodFp = fopen("./store/GOODS.txt", "a+");
-    GOODS_ARRAY goods_array = create_array(50);
+    //创建商品链表头节点
+    GOODS_LIST *goods_list = create_goods_list();
+    strcpy(goods_list->good_data.good_ID, "M00000");
     if(goodFp)
     {
-        GOODS good_data;
+        GOODS_LIST *temp_list = goods_list;
+        //从头节点的下一个节点开始读取
         while(!feof(goodFp))
         {
+            GOODS_LIST *temp_node = create_goods_list();
             fscanf(goodFp, "%s %s %lf %s %s %s %d\n", \
-            good_data.good_ID, \
-            good_data.good_name, \
-            &good_data.good_price, \
-            good_data.good_desription, \
-            good_data.seller_ID, \
-            good_data.listing_time, \
-            &good_data.good_status);
-            good_add(goods_array, good_data);
+            temp_node->good_data.good_ID, \
+            temp_node->good_data.good_name, \
+            &temp_node->good_data.good_price, \
+            temp_node->good_data.good_desription, \
+            temp_node->good_data.seller_ID, \
+            temp_node->good_data.listing_time, \
+            &temp_node->good_data.good_status);
+            temp_list->next = temp_node;
+            temp_list = temp_list->next;
         }
         fclose(goodFp);
     }
-    return goods_array;
+    return goods_list;
 }
