@@ -1,6 +1,6 @@
 /*
  * @Date: 2023-07-08 10:52:35
- * @LastEditTime: 2023-07-31 17:30:00
+ * @LastEditTime: 2023-08-02 18:44:56
  * @FilePath: /stu/study/WhaleMarket/include/order.h
  * @Description: 整个历史订单不超过2000行
  * 
@@ -33,14 +33,13 @@ typedef struct ORDER_NODE{
 typedef struct{
     ORDER_NODE *order_header;
     ORDER_NODE *order_rear;
-    int order_num;
 } ORDERS_QUEUE;
 
-ORDERS_QUEUE orders_create();       //创建订单队列，并返回队列结构订单
+ORDERS_QUEUE* create_orders_queue(void);       //创建订单队列，并返回队列结构订单
 int order_info(ORDER *order_data);  //输入订单信息，成功返回0，失败返回-1
 int order_push(ORDERS_QUEUE *orders_queue, ORDER order_data); //将订单数据推到队列中
 int order_pop(ORDERS_QUEUE *orders_queue);  //将订单的早期数据推出队列
 int save_orders_data(ORDERS_QUEUE *orders_queue);   //将用户数据保存到ORDERS文档中
-ORDERS_QUEUE get_orders_data(void); //将ORDERS文档中的数据读取到队列中
+ORDERS_QUEUE* orders_data_init(void); //将ORDERS文档中的数据读取到队列中
 
 #endif

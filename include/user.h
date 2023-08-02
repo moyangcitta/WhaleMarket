@@ -1,6 +1,6 @@
 /*
  * @Date: 2023-07-08 11:00:22
- * @LastEditTime: 2023-07-31 17:27:01
+ * @LastEditTime: 2023-08-02 18:36:32
  * @FilePath: /stu/study/WhaleMarket/include/user.h
  * @Description: 
  * 
@@ -29,16 +29,16 @@ typedef struct
 typedef struct USERS_LIST{
     USER user_data;                 //保存单个用户数据
     struct USERS_LIST *next;        //保存下一位用户数据的地址
-    int users_list_length;          //用户链表长度
 } USERS_LIST;
 
-USERS_LIST users_create();                              //创建用户链表
+USERS_LIST* create_users_list(void);                              //创建用户链表
+int users_size(USERS_LIST *users_list);         //返回用户个数
 int users_add(USERS_LIST *users_list, USER user_data);  //增加用户信息
-void user_info(USER *user_data);                        //用户信息填写
+USER user_info(char *pre_user_id);                        //用户信息填写
 int user_del(USERS_LIST *users_list, char *user_id);    //删除用户信息
 int user_edit(USERS_LIST *users_list, char *user_id);   //修改用户信息
 USER user_find(USERS_LIST *users_list, char *user_id);  //查找用户信息
-USERS_LIST get_users_data(void);                        //从文件中读取用户信息，并存放于链表中
+USERS_LIST* users_data_init(void);                        //从文件中读取用户信息，并存放于链表中
 int save_users_data(USERS_LIST *users_list);            //将用户链表中的用户信息存放到USERS文件中
 
 #endif

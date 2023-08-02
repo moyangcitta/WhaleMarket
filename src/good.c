@@ -1,6 +1,6 @@
 /*
  * @Date: 2023-07-08 10:35:44
- * @LastEditTime: 2023-08-01 17:07:09
+ * @LastEditTime: 2023-08-02 18:24:05
  * @FilePath: /stu/study/WhaleMarket/src/good.c
  * @Description: 
  * 
@@ -118,12 +118,12 @@ int goods_del(GOODS_LIST *goods_list, char *good_id)
                 temp_list->next = temp_node->next;
                 free(temp_node);
                 jud = 0;
+                if(!save_choose())
+                {
+                    save_goods_data(goods_list);
+                }
                 break;
             }
-        }
-        if(!save_choose())
-        {
-            save_goods_data(goods_list);
         }
     }
     return jud;
@@ -143,7 +143,7 @@ int goods_edit(GOODS_LIST *goods_list, char *good_id)
         GOODS_LIST *temp_list = goods_list;
         while(temp_list->next != NULL)
         {
-            if(strcmp(temp_list->next->good_data.good_ID, good_id))
+            if(!strcmp(temp_list->next->good_data.good_ID, good_id))
             {
                 temp_list->next->good_data = goods_info(temp_list->good_data.good_ID);
                 jud = 0;
@@ -154,6 +154,7 @@ int goods_edit(GOODS_LIST *goods_list, char *good_id)
         {
             save_goods_data(goods_list);
         }
+        temp_list = temp_list->next;
     }
     return jud;
 }
@@ -180,6 +181,7 @@ int save_goods_data(GOODS_LIST *goods_list)
             temp_list->next->good_data.seller_ID, \
             temp_list->next->good_data.listing_time, \
             temp_list->next->good_data.good_status);
+            
             temp_list = temp_list->next;
         }
         fclose(goodFp);
@@ -214,6 +216,7 @@ GOODS_LIST* goods_data_init(void)
             temp_node->good_data.seller_ID, \
             temp_node->good_data.listing_time, \
             &temp_node->good_data.good_status);
+            
             temp_list->next = temp_node;
             temp_list = temp_list->next;
         }

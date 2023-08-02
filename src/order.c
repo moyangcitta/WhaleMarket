@@ -1,6 +1,6 @@
 /*
  * @Date: 2023-07-28 15:58:34
- * @LastEditTime: 2023-07-31 17:35:58
+ * @LastEditTime: 2023-08-02 18:48:17
  * @FilePath: /stu/study/WhaleMarket/src/order.c
  * @Description: 
  * 
@@ -11,12 +11,11 @@
  * @description: 创建订单队列，返回队列结构订单
  * @return {ORDERS_QUEUE}
  */
-ORDERS_QUEUE orders_create()
+ORDERS_QUEUE* create_orders_queue(void)
 {
-    ORDERS_QUEUE orders_queue;
-    orders_queue.order_header = (ORDER_NODE*)malloc(sizeof(ORDER_NODE));
-    orders_queue.order_rear = (ORDER_NODE*)malloc(sizeof(ORDER_NODE));
-    orders_queue.order_num = 0;
+    ORDERS_QUEUE *orders_queue = (ORDERS_QUEUE*)malloc(sizeof(ORDERS_QUEUE));
+    orders_queue->order_header = (ORDER_NODE*)malloc(sizeof(ORDER_NODE));
+    orders_queue->order_rear = (ORDER_NODE*)malloc(sizeof(ORDER_NODE));
 
     return orders_queue;
 }
@@ -144,17 +143,18 @@ int save_orders_data(ORDERS_QUEUE *orders_queue)
  * @description: 将ORDERS文档中的数据读取到队列中
  * @return {*}
  */
-ORDERS_QUEUE get_orders_data(void)
+ORDERS_QUEUE* orders_data_init(void)
 {
-    ORDERS_QUEUE orders_queue = orders_create();
+    ORDERS_QUEUE *orders_queue = create_orders_queue();
     FILE *orderFp = fopen("./store/ORDERS.txt", "a+");
     if(orderFp)
     {
         while(!feof(orderFp))
         {
-            ORDER order_data;
+            ORDER_NODE *temp_list = (ORDER_NODE*)malloc(sizeof(ORDER_NODE));
+            
             fscanf(orderFp, "%s %s %lf %s %s %s\n", \
-            order_data.order_ID, \
+            temp_list->order_data.order_ID, \
             order_data.good_ID, \
             &order_data.trading_price, \
             order_data.trading_time, \
