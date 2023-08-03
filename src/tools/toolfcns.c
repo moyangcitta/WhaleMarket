@@ -1,6 +1,6 @@
 /*
  * @Date: 2023-07-23 22:52:30
- * @LastEditTime: 2023-08-01 13:41:09
+ * @LastEditTime: 2023-08-03 18:28:23
  * @FilePath: /stu/study/WhaleMarket/src/tools/toolfcns.c
  * @Description: 工具函数
  * 
@@ -115,4 +115,21 @@ int difference_value(char *word1, char *word2)
         }
     }
     return rcd;
+}
+
+/**
+ * @description: 输入需要赋值的字符串和序号，将序号添加到字符串中
+ * @param {char} *sentence
+ * @param {int} order
+ * @return {*}
+ */
+void int_to_str(char *sentence, int order)
+{
+    int len = strlen(sentence);
+    for(int i = len - 1; i >= 0 && order > 0; i--)
+    {
+        int temp = order % 10;
+        sentence[i] = '0' + temp;
+        order /= 10;
+    }
 }

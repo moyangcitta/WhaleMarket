@@ -1,11 +1,22 @@
 /*
  * @Date: 2023-07-28 15:58:34
- * @LastEditTime: 2023-08-02 18:48:17
+ * @LastEditTime: 2023-08-03 19:07:39
  * @FilePath: /stu/study/WhaleMarket/src/order.c
  * @Description: 
  * 
  */
 #include "order.h"
+
+/**
+ * @description: 创建订单链表，并返回一个订单链表节点
+ * @return {*}
+ */
+ORDERS_LIST* create_orders_list(void)
+{
+    ORDERS_LIST *orders_list = (ORDERS_LIST*)malloc(sizeof(ORDERS_LIST));
+    orders_list->next = NULL;
+    return orders_list;
+}
 
 /**
  * @description: 创建订单队列，返回队列结构订单
@@ -14,10 +25,27 @@
 ORDERS_QUEUE* create_orders_queue(void)
 {
     ORDERS_QUEUE *orders_queue = (ORDERS_QUEUE*)malloc(sizeof(ORDERS_QUEUE));
-    orders_queue->order_header = (ORDER_NODE*)malloc(sizeof(ORDER_NODE));
-    orders_queue->order_rear = (ORDER_NODE*)malloc(sizeof(ORDER_NODE));
+    orders_queue->order_header = create_orders_list();
+    orders_queue->order_rear = create_orders_list();
 
     return orders_queue;
+}
+
+/**
+ * @description: 返回队列的大小
+ * @param {ORDERS_QUEUE*} orders_queue
+ * @return {*}
+ */
+int orders_size(ORDERS_QUEUE* orders_queue)
+{
+    int rcd = 0;
+    ORDERS_LIST* orders_list = orders_queue;
+    while(orders_list->next != NULL)
+    {
+        rcd++;
+        orders_list = orders_list->next;
+    }
+    return rcd;
 }
 
 /**
@@ -25,16 +53,15 @@ ORDERS_QUEUE* create_orders_queue(void)
  * @param {ORDER} *order_data
  * @return {*}
  */
-int order_info(ORDER *order_data)
+ORDERS order_info(void)
 {
     int jud = 0;
-    scanf("%s", order_data->order_ID);
-    scanf("%s", order_data->good_ID);
-    scanf("%lf", &order_data->trading_price);
-    scanf("%s", order_data->trading_time);
-    scanf("%s", order_data->seller_ID);
-    scanf("%s", order_data->buyer_ID);
-    return jud;
+    ORDERS order_data;
+    scanf("%lf", &order_data.trading_price);
+    scanf("%s", order_data.trading_time);
+    scanf("%s", order_data.seller_ID);
+    scanf("%s", order_data.buyer_ID);
+    return order_data;
 }
 
 /**
@@ -42,42 +69,23 @@ int order_info(ORDER *order_data)
  * @param {ORDERS_QUEUE} *orders_queue
  * @return {*}
  */
-int order_push(ORDERS_QUEUE *orders_queue, ORDER order_data)
+int order_push(ORDERS_QUEUE *orders_queue)
 {
-    int jud = 0;
-    ORDER_NODE *order_node = (ORDER_NODE*)malloc(sizeof(ORDER_NODE));
-    if(0 == orders_queue->order_num)
-    {
-        order_info(&order_node->order_data);
-        order_node->next = NULL;
-        orders_queue->order_header = order_node;
-        orders_queue->order_rear = order_node;
-        orders_queue->order_num = 1;
-        if(save_choose())
-        {
-            save_orders_data(orders_queue);
-        }
-    }
-    else if(2000 >= orders_queue->order_num)
-    {
-        order_info(&order_node->order_data);
-        orders_queue->order_rear->next = order_node;
-        orders_queue->order_rear = order_node;
-        orders_queue->order_num++;
-        if(save_choose())
-        {
-            save_orders_data(orders_queue);
-        }
-    }
-    else if(2000 == orders_queue->order_num)
+    int jud = -1;
+    ORDERS_LIST *temp_list = create_orders_list();
+    if(2000 == orders_size(orders_queue))
     {
         order_pop(orders_queue);
-        order_push(orders_queue, order_data);
-        if(save_choose())
-        {
-            save_orders_data(orders_queue);
-        }
     }
+    temp_list->order_data = order_info();
+        
+    orders_queue->order_rear->next = temp_list;
+    orders_queue->order_rear = temp_list;
+    if(save_choose())
+    {
+        save_orders_data(orders_queue);
+    }
+    jud = 0;
     return jud;
 }
 
@@ -89,17 +97,15 @@ int order_push(ORDERS_QUEUE *orders_queue, ORDER order_data)
 int order_pop(ORDERS_QUEUE *orders_queue)
 {
     int jud = 0;
-    if(orders_queue->order_num == 0)
+    if(0 == orders_size(orders_queue))
     {
-        printf("Delete fail!\n");
         jud = -1;
     }
     else
     {
-        ORDER_NODE *order_tmp = orders_queue->order_header;
+        ORDERS_LIST *temp_list = orders_queue->order_header;
         orders_queue->order_header = orders_queue->order_header->next;
-        free(order_tmp);
-        orders_queue->order_num--;
+        free(temp_list);
         if(save_choose())
         {
             save_orders_data(orders_queue);
@@ -115,26 +121,24 @@ int order_pop(ORDERS_QUEUE *orders_queue)
  */
 int save_orders_data(ORDERS_QUEUE *orders_queue)
 {
-    int jud = 0;
+    int jud = -1;
     FILE *orderFp = fopen("./store/ORDERS.txt", "w+");
     if(orderFp)
     {
-        ORDER_NODE *order_temp = orders_queue->order_header;
-        while(order_temp != NULL)
+        ORDERS_LIST *temp_list = orders_queue->order_header;
+        while(temp_list->next != NULL)
         {
-            fprintf(orderFp, "%s %s %.1lf %s %s %s\n", \
-            order_temp->order_data.order_ID, \
-            order_temp->order_data.good_ID, \
-            order_temp->order_data.trading_price, \
-            order_temp->order_data.trading_time, \
-            order_temp->order_data.seller_ID, \
-            order_temp->order_data.buyer_ID);
+            fprintf(orderFp, "%s %.1lf %s %s %s\n", \
+            temp_list->next->order_data.good_ID, \
+            temp_list->next->order_data.trading_price, \
+            temp_list->next->order_data.trading_time, \
+            temp_list->next->order_data.seller_ID, \
+            temp_list->next->order_data.buyer_ID);
+
+            temp_list = temp_list->next;
         }
+        jud = 0;
         fclose(orderFp);
-    }
-    else
-    {
-        jud = -1;
     }
     return jud;
 }
@@ -149,18 +153,28 @@ ORDERS_QUEUE* orders_data_init(void)
     FILE *orderFp = fopen("./store/ORDERS.txt", "a+");
     if(orderFp)
     {
+        ORDERS_LIST *temp_list = create_orders_list();
+        strcpy(temp_list->order_data.order_ID, "T00000");
+        //orders_queue初始化
+        orders_queue->order_header = temp_list;
+        orders_queue->order_rear = temp_list;
+        //从头节点的下一个节点开始读取
         while(!feof(orderFp))
         {
-            ORDER_NODE *temp_list = (ORDER_NODE*)malloc(sizeof(ORDER_NODE));
+            //订单编号统一，后期通过int_to_str()函数处理
+            ORDERS_LIST *temp_node = create_orders_list();
+            strcpy(temp_node->order_data.order_ID, "T00000");
             
-            fscanf(orderFp, "%s %s %lf %s %s %s\n", \
-            temp_list->order_data.order_ID, \
-            order_data.good_ID, \
-            &order_data.trading_price, \
-            order_data.trading_time, \
-            order_data.seller_ID, \
-            order_data.buyer_ID);
-            order_push(&orders_queue, order_data);
+            fscanf(orderFp, "%s %lf %s %s %s\n", \
+            temp_node->order_data.good_ID, \
+            &temp_node->order_data.trading_price, \
+            temp_node->order_data.trading_time, \
+            temp_node->order_data.seller_ID, \
+            temp_node->order_data.buyer_ID);
+
+            temp_list->next = temp_node;
+            temp_list = temp_list->next;
+            orders_queue->order_rear = temp_node;
         }
         fclose(orderFp);
     }
